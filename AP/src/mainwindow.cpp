@@ -11,9 +11,11 @@ MainWindow::MainWindow(QWidget *parent)
 
     ui->stackedWidget->addWidget(&qt_socketclient);
     ui->stackedWidget->addWidget(&qt_filemanage);
+    ui->stackedWidget->addWidget(&qt_connectclient);
 
     btnGroup.addButton(ui->btn_connect, 0);
     btnGroup.addButton(ui->btn_filepage, 1);
+    btnGroup.addButton(ui->btn_connectclient, 2);
 
     connect(
         &btnGroup,
@@ -60,6 +62,7 @@ MainWindow::MainWindow(QWidget *parent)
 
     connect(this, &MainWindow::signal_deal_receivedmsg_to_mainwindow, this, &MainWindow::slot_deal_receivemsg_from_server);
     connect(&this->qt_filemanage, &QT_FileManage::signal_cal_file_fullkey_to_mainwindow, this, &MainWindow::slot_calculate_file_fullkey_from_filemanage);
+    connect(this, &MainWindow::signal_send_msg_to_filemanage, &this->qt_filemanage, &QT_FileManage::slot_receive_msg_from_mainwindow);
 }
 
 MainWindow::~MainWindow()
@@ -266,8 +269,10 @@ void MainWindow::slot_calculate_file_fullkey_from_filemanage(QString filepath)
     std::string Ppub_hex = kgc_parameter.Ppub_hex.toStdString();
     Process *process = new Process(pid, k, Ppub_hex);
     process->GenerateFullKey(partial_key);
+    this->process_map.insert(filepath, process);
+    this->qt_filemanage.fullkey_file.append(filepath);
+    this->qt_filemanage.slot_update_filewidget();
 
-
-
+    emit signal_send_msg_to_filemanage(filepath + "完整密钥计算完成\n");
 }
 

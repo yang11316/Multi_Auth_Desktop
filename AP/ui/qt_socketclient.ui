@@ -29,7 +29,7 @@
    <item row="0" column="0" colspan="2">
     <widget class="QGroupBox" name="groupBox">
      <property name="title">
-      <string>客户端</string>
+      <string>AS</string>
      </property>
      <layout class="QGridLayout" name="gridLayout_2">
       <item row="0" column="0">
@@ -37,7 +37,7 @@
         <item>
          <widget class="QLabel" name="label">
           <property name="text">
-           <string>客户端ip:</string>
+           <string>AS ip:</string>
           </property>
          </widget>
         </item>

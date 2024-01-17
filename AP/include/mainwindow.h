@@ -17,6 +17,9 @@
 
 #include "qt_socketclient.h"
 #include "qt_filemanage.h"
+#include "qt_connectclient.h"
+
+
 #include "Data_struct.h"
 #include "loader.h"
 #include <openssl/bn.h>
@@ -81,12 +84,15 @@ signals:
 
     void signal_server_connect_to_socketpage();
 
+    void signal_send_msg_to_filemanage(QString msg);
+
 private:
     Ui::MainWindow *ui;
     QButtonGroup btnGroup;
 
     QT_SocketClient qt_socketclient;
     QT_FileManage qt_filemanage;
+    QT_ConnectClient qt_connectclient;
 
     QTcpSocket *socket;
     quint16 server_port ;
@@ -97,6 +103,7 @@ private:
 
 
     QString acc_public_key;
+    QString acc_currnet;
 
     //存储序列化数据
     QByteArray Serialize_receive_dataArray;

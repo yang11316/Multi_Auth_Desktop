@@ -44,7 +44,6 @@ add_executable(${PROJECT_NAME}
         )
 
 
-
 target_link_libraries(Multi_Level_Authentication_pairFree_Client PRIVATE Qt5::Widgets Qt5::Network)
 
 target_link_libraries(${PROJECT_NAME} PRIVATE

@@ -49,6 +49,7 @@ struct file_struct
     std::string partial_key1 = "";
     std::string partial_key2 = "";
     std::string file_acc_wit = "";
+    std::string calculate = "";
 
     bool operator == (file_struct &e)
     {

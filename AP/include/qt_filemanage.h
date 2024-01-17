@@ -21,7 +21,7 @@ class QT_FileManage : public QWidget
 public:
     explicit QT_FileManage(QWidget *parent = nullptr);
     ~QT_FileManage();
-
+    QStringList fullkey_file;
 
 public slots:
     void slot_update_filewidget();
@@ -30,6 +30,7 @@ public slots:
 
     void slot_keybtn_clicked();
 
+    void slot_receive_msg_from_mainwindow(QString msg);
 
 signals:
     void signal_cal_file_fullkey_to_mainwindow(QString filepath);
@@ -42,6 +43,7 @@ private:
     QMap<QString, QString> pid_map;
     QMap<QString, QString> partical1_map;
     QMap<QString, QString> partical2_map;
+
 
     QSet<QString> existing_file;
 

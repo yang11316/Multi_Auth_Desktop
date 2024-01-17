@@ -66,6 +66,7 @@ void QT_FileManage::slot_update_filewidget()
                     QString::fromStdString(vector_file_json[i].file_path));
                 pItem->setSizeHint(QSize(0, 30));
                 pItem->setText(QString::fromStdString(file_name));
+                this->ui->file_lsitwidget->addItem(pItem);
             }
 
         }
@@ -81,7 +82,6 @@ void QT_FileManage::slot_filewidget_clicked()
     {
         ui->file_edit->clear();
         ui->key_btn->setEnabled(true);
-        ui->send_btn->setEnabled(false);
         QString filepath = item->data(Qt::UserRole).toString();
         QString filename = item->text();
         QFileInfo finfo(filepath);
@@ -106,6 +106,14 @@ void QT_FileManage::slot_filewidget_clicked()
             ui->file_edit->appendPlainText(file_birthtime);
             ui->file_edit->appendPlainText(file_lastmodified);
             ui->file_edit->appendPlainText(file_lastread);
+            if (this->fullkey_file.contains(filepath))
+            {
+                this->ui->key_btn->setEnabled(false);
+            }
+            else
+            {
+                this->ui->key_btn->setEnabled(true);
+            }
 
         }
     }
@@ -119,4 +127,9 @@ void QT_FileManage::slot_keybtn_clicked()
         QString file_path = item->data(Qt::UserRole).toString();
         emit signal_cal_file_fullkey_to_mainwindow(file_path);
     }
+}
+
+void QT_FileManage::slot_receive_msg_from_mainwindow(QString msg)
+{
+    this->ui->file_edit->appendPlainText(msg);
 }
