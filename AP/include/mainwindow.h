@@ -20,7 +20,6 @@
 #include "qt_connectclient.h"
 
 
-#include "Data_struct.h"
 #include "loader.h"
 #include <openssl/bn.h>
 #include <openssl/ec.h>
@@ -39,6 +38,42 @@ namespace Ui
     class MainWindow;
 }
 QT_END_NAMESPACE
+
+struct Kgc_Parameter
+{
+    QString Ppub_hex;
+    int k;
+
+    // 重写QDataStream& operator<<操作符，做数据序列化操作
+    friend QDataStream &operator<<(QDataStream &stream, const Kgc_Parameter &tmp_parameter)
+    {
+        // 将数据输入流对象中
+        stream << tmp_parameter.Ppub_hex;
+        stream << tmp_parameter.k;
+        return stream;
+    }
+
+    // 重写QDataStream& operator>>操作符，做数据反序列化操作
+    friend QDataStream &operator>>(QDataStream &stream, Kgc_Parameter &tmp_parameter)
+    {
+        // 从流对象中输出数据到学生结构体引用中
+        stream >> tmp_parameter.Ppub_hex;
+        stream >> tmp_parameter.k;
+        return stream;
+    }
+
+    // 重写QDebug operator<<函数，用作输出内容
+    friend QDebug operator<<(QDebug debug, const Kgc_Parameter &tmp_parametert)
+    {
+        // 向QDebug对象输入数据
+        debug << "Ppub_hex " << tmp_parametert.Ppub_hex;
+        debug << "\nk " << tmp_parametert.k;
+        debug << "\n";
+        return debug;
+    }
+};
+
+
 
 
 class MainWindow : public QMainWindow
@@ -72,6 +107,10 @@ public slots:
 
     void slot_calculate_file_fullkey_from_filemanage(QString filepath);
 
+    void slot_calculate_file_payload_from_connectclient(QString local_file_path, QString msg, QString target_file_name,
+            QString target_file_hash);
+
+    void slot_receive_get_qpayload_from_connectclient(QPayload qpayload);
 
 signals:
     void signal_send_commonmsg_to_socketpage(QString msg);
@@ -85,6 +124,10 @@ signals:
     void signal_server_connect_to_socketpage();
 
     void signal_send_msg_to_filemanage(QString msg);
+
+    void signal_send_qpayload_to_connectclient(QPayload qpayload);
+
+    void signal_send_msg_to_connectclient(QString msg);
 
 private:
     Ui::MainWindow *ui;

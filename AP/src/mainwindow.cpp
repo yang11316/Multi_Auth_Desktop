@@ -63,6 +63,14 @@ MainWindow::MainWindow(QWidget *parent)
     connect(this, &MainWindow::signal_deal_receivedmsg_to_mainwindow, this, &MainWindow::slot_deal_receivemsg_from_server);
     connect(&this->qt_filemanage, &QT_FileManage::signal_cal_file_fullkey_to_mainwindow, this, &MainWindow::slot_calculate_file_fullkey_from_filemanage);
     connect(this, &MainWindow::signal_send_msg_to_filemanage, &this->qt_filemanage, &QT_FileManage::slot_receive_msg_from_mainwindow);
+    connect(&this->qt_connectclient, &QT_ConnectClient::signal_calculate_file_payload, this, &MainWindow::slot_calculate_file_payload_from_connectclient);
+
+    connect(this, SIGNAL(signal_send_qpayload_to_connectclient(QPayload)), &this->qt_connectclient, SLOT(slot_receive_qpayload_from_mainwindow(QPayload)));
+    connect(&this->qt_connectclient, SIGNAL(signal_deal_receive_qpayload_to_mainwindow(QPayload)), this,
+            SLOT(slot_receive_get_qpayload_from_connectclient(QPayload)));
+
+    connect(this, &MainWindow::signal_send_msg_to_connectclient, &this->qt_connectclient, &QT_ConnectClient::slot_receive_msg_from_mainwindow);
+
 }
 
 MainWindow::~MainWindow()
@@ -120,6 +128,8 @@ void MainWindow::receive_file_info_from_server()
     QString partial_key1 = msg.section("##", 4, 4);
     QString partial_key2 = msg.section("##", 5, 5);
     QString file_acc_wit =  msg.section("##", 6, 6);
+    this->acc_currnet = msg.section("##", 7, 7);
+
 
 
 
@@ -171,6 +181,7 @@ void MainWindow::receive_file_body_from_server()
     this->Serialize_receive_dataArray.resize(0);
     slot_receive_msg_from_server();
     this->qt_filemanage.slot_update_filewidget();
+    this->qt_connectclient.read_file_json();
 
 }
 
@@ -274,5 +285,77 @@ void MainWindow::slot_calculate_file_fullkey_from_filemanage(QString filepath)
     this->qt_filemanage.slot_update_filewidget();
 
     emit signal_send_msg_to_filemanage(filepath + "完整密钥计算完成\n");
+}
+
+void MainWindow::slot_calculate_file_payload_from_connectclient(QString local_file_path, QString msg, QString target_file_name, QString target_file_hash)
+{
+    if (process_map.contains(local_file_path))
+    {
+        Process *tmp_process = this->process_map.value(local_file_path);
+        std::string wit = loader::get_flie_accwit(this->cal_file_path.toStdString(), local_file_path.toStdString());
+        Payload payload = tmp_process->sign(msg.toStdString(), wit, this->acc_public_key.toStdString());
+        struct QPayload qpayload;
+        qpayload.pid = QString::fromStdString(payload.pid);
+        qpayload.msg = QString::fromStdString(payload.msg);
+        qpayload.sig1 = QString::fromStdString(payload.sig1);
+        qpayload.sig2 = QString::fromStdString(payload.sig2);
+        qpayload.pk1 = QString::fromStdString(payload.pk1);
+        qpayload.pk2 = QString::fromStdString(payload.pk2);
+        qpayload.time_stamp = QString::fromStdString(payload.time_stamp);
+        qpayload.wit_new = QString::fromStdString(payload.wit_new);
+        qpayload.file_name = target_file_name;
+        qpayload.file_hash = target_file_hash;
+        emit signal_send_qpayload_to_connectclient(qpayload);
+
+
+
+    }
+
+}
+
+void MainWindow::slot_receive_get_qpayload_from_connectclient(QPayload qpayload)
+{
+    Payload payload;
+    payload.pid = qpayload.pid.toStdString();
+    payload.msg = qpayload.msg.toStdString();
+    payload.sig1 = qpayload.sig1.toStdString();
+    payload.sig2 = qpayload.sig2.toStdString();
+    payload.pk1 = qpayload.pk1.toStdString();
+    payload.pk2 = qpayload.pk2.toStdString();
+    payload.time_stamp = qpayload.time_stamp.toStdString();
+    payload.wit_new = qpayload.wit_new.toStdString();
+    QString file_name = qpayload.file_name;
+    QString file_hash = qpayload.file_hash;
+    std::string file_path = loader::get_file_path_by_hash(this->cal_file_path.toStdString(), file_hash.toStdString());
+    std::string file_pid = loader::get_file_pid(this->cal_file_path.toStdString(), file_path);
+
+    Process *tmp_process;
+    if (this->process_map.contains(QString::fromStdString(file_path)))
+    {
+        tmp_process = this->process_map.value(QString::fromStdString(file_path));
+    }
+    else
+    {
+        tmp_process = new Process(file_pid, this->kgc_parameter.k, this->kgc_parameter.Ppub_hex.toStdString());
+        this->process_map.insert(QString::fromStdString(file_path), tmp_process);
+    }
+
+    std::string Ppup_hex = this->kgc_parameter.Ppub_hex.toStdString();
+    std::string acccurrent = this->acc_currnet.toStdString();
+    std::string accpublickey = this->acc_public_key.toStdString();
+
+    if (tmp_process->verify(payload, this->kgc_parameter.k, Ppup_hex, acccurrent,
+                            accpublickey))
+    {
+        QString msg = file_name + " verify AP message: " + qpayload.msg + "\n";
+        emit signal_send_msg_to_connectclient(msg);
+    }
+    else
+    {
+        QString msg = file_name + " verify failure\n";
+        emit signal_send_msg_to_connectclient(msg);
+    }
+
+
 }
 

@@ -257,6 +257,7 @@ namespace loader
         }
         else
         {
+            ifs.close();
             return false;
         }
     }
@@ -326,6 +327,7 @@ namespace loader
         }
         else
         {
+            ifs.close();
             return false;
         }
     }
@@ -365,6 +367,7 @@ namespace loader
         }
         else
         {
+            ifs.close();
             return vector_file_json;
         }
     }
@@ -392,8 +395,10 @@ namespace loader
                     break;
                 }
             }
-
-
+        }
+        else
+        {
+            ifs.close();
         }
         return partial_key;
 
@@ -420,8 +425,68 @@ namespace loader
                     return item["pid"].asString();
                 }
             }
+        }
+        else
+        {
+            ifs.close();
+        }
+        return "";
+    }
 
+    std::string get_flie_accwit(const std::string &path, std::string filepath)
+    {
+        Json::Reader reader;
+        std::ifstream ifs;
+        Json::Value root;
+        Json::Value item;
+        ifs.open(path);
+        if (reader.parse(ifs, root))
+        {
+            ifs.close();
+            Json::Value detail = root["packages"];
+            int size = detail.size();
+            for (int i = 0 ; i < size; ++i)
+            {
+                item = root["packages"][i];
+                if (filepath == item["filepath"].asString())
+                {
 
+                    return item["file_acc_wit"].asString();
+                }
+            }
+        }
+        else
+        {
+            ifs.close();
+        }
+        return "";
+    }
+
+    std::string get_file_path_by_hash(const std::string &path, std::string filehash)
+    {
+        Json::Reader reader;
+        std::ifstream ifs;
+        Json::Value root;
+        Json::Value item;
+        ifs.open(path);
+        if (reader.parse(ifs, root))
+        {
+            ifs.close();
+            Json::Value detail = root["packages"];
+            int size = detail.size();
+            for (int i = 0 ; i < size; ++i)
+            {
+                item = root["packages"][i];
+                if (filehash == item["md5"].asString())
+                {
+
+                    return item["filepath"].asString();
+                }
+            }
+        }
+        else
+        {
+            ifs.close();
         }
         return "";
     }

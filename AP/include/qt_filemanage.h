@@ -32,6 +32,7 @@ public slots:
 
     void slot_receive_msg_from_mainwindow(QString msg);
 
+
 signals:
     void signal_cal_file_fullkey_to_mainwindow(QString filepath);
 

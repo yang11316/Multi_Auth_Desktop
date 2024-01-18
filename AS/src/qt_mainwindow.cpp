@@ -218,9 +218,11 @@ void QT_MainWindow::send_file_info_to_client(QString client_index, char typenumb
         QString client_port = client_index.section(":", 1, 1);
 
 
+        QString acc_cur = QString::fromStdString( this->acc_ptr->acc_cur.get_str(16));
 
-        QString str = QString("%1##%2##%3##%4##%5##%6##%7").arg(this->send_file_name).arg(send_file_size)
-                      .arg(file_pid).arg(file_hash).arg(partial_key1).arg(partial_key2).arg(file_acc_wit);
+
+        QString str = QString("%1##%2##%3##%4##%5##%6##%7##%8").arg(this->send_file_name).arg(send_file_size)
+                      .arg(file_pid).arg(file_hash).arg(partial_key1).arg(partial_key2).arg(file_acc_wit).arg(acc_cur);
         int msg_size = str.size();
         tmp_client->write((char *)&msg_size, 4);
         tmp_client->write(&typenumber, 1);

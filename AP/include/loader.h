@@ -146,6 +146,8 @@ namespace loader
 
     std::vector<std::string> get_file_partial_key(const std::string &path, std::string filepath);
     std::string get_file_pid(const std::string &path, std::string filepath);
+    std::string get_flie_accwit(const std::string &path, std::string filepath);
+    std::string get_file_path_by_hash(const std::string &path, std::string filehash);
 
 
 }  // namespace loader
